@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Counter-Exposure Engine - Local Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #fff; }
+        .stream { border: 1px solid #333; margin: 10px 0; padding: 15px; border-radius: 8px; background: #2a2a2a; }
+        .title { font-size: 18px; font-weight: bold; color: #4CAF50; }
+        .channel { color: #81C784; margin: 5px 0; }
+        .viewers { color: #FFA726; }
+        .url { color: #64B5F6; text-decoration: none; }
+        .underexposed { border-left: 4px solid #FF5722; }
+        h1 { color: #4CAF50; }
+        .refresh-btn { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🎯 Counter-Exposure Engine - Live Streams</h1>
+    <button class="refresh-btn" onclick="location.reload()">🔄 Refresh</button>
+    <div id="streams">
+        <p>Run the Python script to populate this page with live streams!</p>
+        <p>Command: <code>python test_youtube_live.py</code></p>
+    </div>
+    
+    <script>
+        // Auto-refresh every 5 minutes
+        setTimeout(() => location.reload(), 300000);
+    </script>
+</body>
+</html>

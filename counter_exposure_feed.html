@@ -1,0 +1,596 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Counter-Exposure Engine - Live Feed</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
+            color: #fff; 
+            min-height: 100vh;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            padding: 20px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 10px;
+            border: 1px solid #4CAF50;
+        }
+        .header h1 { 
+            color: #4CAF50; 
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .stats { 
+            display: flex; 
+            justify-content: center; 
+            gap: 30px; 
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat { 
+            background: rgba(255,255,255,0.1); 
+            padding: 15px 25px; 
+            border-radius: 8px; 
+            text-align: center;
+        }
+        .stat-number { 
+            font-size: 2em; 
+            font-weight: bold; 
+            color: #4CAF50; 
+        }
+        .content-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
+            gap: 20px; 
+            margin-top: 30px;
+        }
+        .content-item { 
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; 
+            padding: 20px; 
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .content-item:hover { 
+            transform: translateY(-5px); 
+            border-color: #4CAF50; 
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        }
+        .content-item.live { 
+            border-left: 4px solid #FF5722; 
+            background: rgba(255, 87, 34, 0.1);
+        }
+        .content-item.underexposed { 
+            border-left: 4px solid #4CAF50; 
+        }
+        .platform { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: #4CAF50; 
+            color: white; 
+            padding: 5px 10px; 
+            border-radius: 15px; 
+            font-size: 0.8em;
+        }
+        .platform.youtube { background: #FF0000; }
+        .platform.web { background: #2196F3; }
+        .title { 
+            font-size: 1.2em; 
+            font-weight: bold; 
+            margin: 10px 0; 
+            color: #4CAF50; 
+            line-height: 1.4;
+        }
+        .channel { 
+            color: #81C784; 
+            margin: 5px 0; 
+            font-weight: 500;
+        }
+        .description { 
+            color: #ccc; 
+            margin: 10px 0; 
+            line-height: 1.5;
+            font-size: 0.9em;
+        }
+        .metrics { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 15px 0; 
+            font-size: 0.9em;
+        }
+        .views { 
+            color: #FFA726; 
+        }
+        .score { 
+            color: #4CAF50; 
+            font-weight: bold;
+        }
+        .url { 
+            color: #64B5F6; 
+            text-decoration: none; 
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+        .url:hover { 
+            color: #90CAF9; 
+            text-decoration: underline;
+        }
+        .refresh-info { 
+            text-align: center; 
+            margin: 30px 0; 
+            color: #888; 
+            font-style: italic;
+        }
+        .live-indicator { 
+            background: #FF5722; 
+            color: white; 
+            padding: 3px 8px; 
+            border-radius: 10px; 
+            font-size: 0.8em; 
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .no-content { 
+            text-align: center; 
+            padding: 50px; 
+            color: #888; 
+            font-size: 1.2em;
+        }
+    </style>
+    <script>
+        // Auto-refresh every 10 minutes
+        setTimeout(() => location.reload(), 600000);
+        
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('timestamp').textContent = now.toLocaleString();
+        }
+        
+        setInterval(updateTimestamp, 1000);
+        window.onload = updateTimestamp;
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>Counter-Exposure Engine</h1>
+        <p>Discovering underexposed content across platforms</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">33</div>
+                <div>Items Discovered</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">13</div>
+                <div>YouTube Videos</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">3</div>
+                <div>Live Streams</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">20</div>
+                <div>Ultra-Underexposed</div>
+            </div>
+        </div>
+        <div class="refresh-info">
+            Last updated: <span id="timestamp"></span> | Auto-refresh in 10 minutes
+        </div>
+    </div>
+    
+    <div class="content-grid">
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">ผวนวนไป  #aimusic #music #เพลงกวนๆ #เพลงตลก #เพลงใหม่</div>
+            <div class="channel">📺 AI Music Fun</div>
+            <div class="description">"เพลงใหม่แนวตลกตลาดไทย สายฮา สายแดนซ์ ฟังแล้วขำกลิ้ง เต้นมันส์กับคำผวนสุดกวน....</div>
+            <div class="metrics">
+                <span class="views">👀 104 views</span>
+                <span class="score">📊 Score: 0.896</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=FNOQOTkY-ls" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=FNOQOTkY-ls</a>
+        </div>
+
+        <div class="content-item live">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">Houston vs. Texas Tech LIVE 10/04/2025 | College Football 2025 | NCAAF Week 6<span class="live-indicator">LIVE</span></div>
+            <div class="channel">📺 كوكب حكايات - Hkayat TV</div>
+            <div class="description">Houston vs. Texas Tech LIVE 10/04/2025 | College Football 2025 | NCAAF Week 6 Kentucky vs. Georgia Air Force vs....</div>
+            <div class="metrics">
+                <span class="views">👀 109 views</span>
+                <span class="score">📊 Score: 0.891</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=XM52rd82tc8" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=XM52rd82tc8</a>
+        </div>
+
+        <div class="content-item live">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">Texas Tech vs. Houston LIVE | College Football Week 6 | NCAAF Oct 04, 2025<span class="live-indicator">LIVE</span></div>
+            <div class="channel">📺 Costuras da Jê</div>
+            <div class="description">Texas Tech vs. Houston LIVE | College Football Week 6 | NCAAF Oct 04, 2025....</div>
+            <div class="metrics">
+                <span class="views">👀 161 views</span>
+                <span class="score">📊 Score: 0.839</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=Cpx1zvJEnjA" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=Cpx1zvJEnjA</a>
+        </div>
+
+        <div class="content-item live">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">Texas Tech vs. Houston LIVE 10/04/2025 | College Football 2025 | NCAAF Week 6<span class="live-indicator">LIVE</span></div>
+            <div class="channel">📺 كوكب حكايات - Hkayat TV</div>
+            <div class="description">Texas Tech vs. Houston LIVE 10/04/2025 | College Football 2025 | NCAAF Week 6 Kentucky vs. Georgia Air Force vs....</div>
+            <div class="metrics">
+                <span class="views">👀 181 views</span>
+                <span class="score">📊 Score: 0.819</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=Z5aVd4mZTrY" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=Z5aVd4mZTrY</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">#shortsfeed #music #rnb #rnbmusic #lyrics #jacquees #dejloaf #latenightplaylist</div>
+            <div class="channel">📺 Big Ant 23💧</div>
+            <div class="description">...</div>
+            <div class="metrics">
+                <span class="views">👀 198 views</span>
+                <span class="score">📊 Score: 0.802</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=NqFlHNK3ciQ" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=NqFlHNK3ciQ</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">Never Find  - Jah cure #reggaewine #reggaeton #reggaemusic #music #musicstyle #m...</div>
+            <div class="channel">📺 Shirley Harmon</div>
+            <div class="description">...</div>
+            <div class="metrics">
+                <span class="views">👀 211 views</span>
+                <span class="score">📊 Score: 0.789</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=FEXKtpYCaYU" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=FEXKtpYCaYU</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">Lovely C #cover #singersongwriter #music #singer #coversong #youtubeshorts #art ...</div>
+            <div class="channel">📺 1-minutecraft</div>
+            <div class="description">...</div>
+            <div class="metrics">
+                <span class="views">👀 261 views</span>
+                <span class="score">📊 Score: 0.739</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=qwbL-_z_a0g" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=qwbL-_z_a0g</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">New henna design 🌺🌷new mehndi design #a #Aactivities#henna #art #design #viral #...</div>
+            <div class="channel">📺 A Activities </div>
+            <div class="description">new mehndi design    #aactivities #viral....</div>
+            <div class="metrics">
+                <span class="views">👀 316 views</span>
+                <span class="score">📊 Score: 0.684</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=OigLW65AubM" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=OigLW65AubM</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">JAX toy #music #art #audio #animation #musicanimation #funny #animatry</div>
+            <div class="channel">📺 Slothboy737</div>
+            <div class="description">...</div>
+            <div class="metrics">
+                <span class="views">👀 356 views</span>
+                <span class="score">📊 Score: 0.644</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=8AKQhg9VxWc" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=8AKQhg9VxWc</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">A song to get to know about me #art #drawing</div>
+            <div class="channel">📺 Emery’s life</div>
+            <div class="description">...</div>
+            <div class="metrics">
+                <span class="views">👀 364 views</span>
+                <span class="score">📊 Score: 0.636</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=6lutDLSWN3o" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=6lutDLSWN3o</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">Shitzle Dog. #art   #comedy    #funny    #halloweencostumes  #scary   #creepy</div>
+            <div class="channel">📺 Albany Treadmill</div>
+            <div class="description">...</div>
+            <div class="metrics">
+                <span class="views">👀 444 views</span>
+                <span class="score">📊 Score: 0.556</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=kpnwESxXgVs" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=kpnwESxXgVs</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">Stardew Valley: Symphony of Seasons - Night Market #stardewvalley #livemusic #ga...</div>
+            <div class="channel">📺 Shacknews</div>
+            <div class="description">shacknews #symphony #shorts Stardew Valley: Symphony of Seasons is the second concert tour featuring music from the video ......</div>
+            <div class="metrics">
+                <span class="views">👀 467 views</span>
+                <span class="score">📊 Score: 0.533</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=2v9Qn4SPkfQ" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=2v9Qn4SPkfQ</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform youtube">YouTube</div>
+            <div class="title">Gobinda Hari Gobinda 🙏🕉🙏 #tirupati #tirumala #gobinda #ram #hindu #music #devoti...</div>
+            <div class="channel">📺 Explore with Debasis🚃🚃</div>
+            <div class="description">...</div>
+            <div class="metrics">
+                <span class="views">👀 490 views</span>
+                <span class="score">📊 Score: 0.510</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=ihiLG-t12eA" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=ihiLG-t12eA</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">Cows swept away by flood - diy mini 2-storey Cow shed making with bricks science...</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 185 446 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.068</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=hfv6tZIWfUY" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=hfv6tZIWfUY</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">How to get out of small channel HELL (forever)</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 64 784 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.066</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=R0cKXAEa76U" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=R0cKXAEa76U</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">do not follow me plz (unless you like my other topics)</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 3 698 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.065</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=RnKe_rTF6Xo" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=RnKe_rTF6Xo</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">how much Youtube paid me | first month monetized as a small creator</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 173 015 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.064</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=nhuIDUPNcqg" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=nhuIDUPNcqg</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">Keep going small content creators</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: Inga visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.063</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=fE0JEDHZVTY" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=fE0JEDHZVTY</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">The Very Small Creatures Full Episodes Series 1 Compilation! All Episodes!</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 4 646 348 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.062</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=FUOKOyfBWOY" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=FUOKOyfBWOY</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">diy making modern Bricks House With Toilet an Balconies Science Project @SmallCr...</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 1 701 595 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.061</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=P3zU3BzaBWc" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=P3zU3BzaBWc</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">How to Get Out of Small Channel H3LL, Forever</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 555 380 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.060</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=hmfkD_lhygU" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=hmfkD_lhygU</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">4 UNDERRATED skincare tips from a korean skinfluencer/founder😮 #skincare #skinca...</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 2 599 522 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.060</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=qJiIRNi4u70" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=qJiIRNi4u70</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">25 Star Fire: Eternal Cycle</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 12 464 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.059</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=-Htq7tXMbqo" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=-Htq7tXMbqo</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">#roblox small creator 5 hours afk builder base</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 1 156 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.059</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=tDG62zhBU1c" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=tDG62zhBU1c</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">Best salicylic serum #underrated  #affordable  #skincareisselflove</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 260 864 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.059</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=osB75W7k210" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=osB75W7k210</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">Why it Sucks to Be a Small Creator</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 1 082 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.058</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=oFgcrcUFQpk" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=oFgcrcUFQpk</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">Unknown Artist - #A9E4FF B (ODE)</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 72 543 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.058</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=cVzcGaafS7M" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=cVzcGaafS7M</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">Azelaic Acid: The Underrated Skincare Hero for Acne \u0026 Hyperpigmentation!</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 341 196 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.058</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=l4qreR-rfmI" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=l4qreR-rfmI</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">25 Deep Rock Galactic: Survivor</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 17 855 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.057</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=W9rryQV4ckU" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=W9rryQV4ckU</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">How Much Money YouTube Paid Me with 3000 Subscribers (My First Year as a Monetiz...</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 3 230 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.057</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=5nha5JlYcLE" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=5nha5JlYcLE</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">Unknown Artist - One Of These Days</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 286 884 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.057</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=-BwRauBVd4I" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=-BwRauBVd4I</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">Sadomas - Underrated (Official video clip)</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 90 994 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.057</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=cyIeA3fJ0uQ" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=cyIeA3fJ0uQ</a>
+        </div>
+
+        <div class="content-item underexposed">
+            <div class="platform websearch">Web Search</div>
+            <div class="title">🚨 LIVE: Chaos In London As Palestinians CLASH With UK Police</div>
+            <div class="channel">📺 Unknown</div>
+            <div class="description">Views: 403 786 visningar</div>
+            <div class="metrics">
+                <span class="views">👀 0 views</span>
+                <span class="score">📊 Score: 0.056</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=YDWNiGGw71s" target="_blank" class="url">🔗 https://www.youtube.com/watch?v=YDWNiGGw71s</a>
+        </div>
+
+    </div>
+</body>
+</html>
