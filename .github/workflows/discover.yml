@@ -22,20 +22,15 @@ jobs:
           cache: 'pip'
       
       - name: 📦 Install dependencies
-        run: |
-          cd CascadeProjects/windsurf-project
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
       
       - name: 🔍 Run discovery
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-        run: |
-          cd CascadeProjects/windsurf-project
-          python simple_web_ui.py
+        run: python simple_web_ui.py
       
       - name: 📊 Display stats
         run: |
-          cd CascadeProjects/windsurf-project
           if [ -f counter_exposure_feed.html ]; then
             echo "✅ Feed generated successfully!"
             ls -lh counter_exposure_feed.html
@@ -48,7 +43,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./CascadeProjects/windsurf-project
+          publish_dir: ./
           publish_branch: gh-pages
           keep_files: false
           enable_jekyll: false
