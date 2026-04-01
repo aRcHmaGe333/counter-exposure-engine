@@ -1,4 +1,4 @@
-# Counter-Exposure Engine
+﻿# Counter-Exposure Engine
 
 A system for discovering and surfacing underexposed live streams and content across multiple platforms, giving fair exposure to creators who haven't gained traction yet.
 
@@ -174,3 +174,11 @@ The engine is built with modularity in mind - new platform clients can be added 
 ---
 
 **Built to give everyone a fair chance at exposure. 🎯**
+## Support This Work
+
+If this project is useful to you, consider supporting ongoing independent development.
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20this%20work-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/earthcraft)
+
+Direct link: https://ko-fi.com/earthcraft
+
